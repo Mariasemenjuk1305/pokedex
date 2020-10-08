@@ -4,7 +4,6 @@ let info = [];
 let pokeAll = document.getElementsByClassName("poke");
 let start = 0;
 let end = 12;
-console.log(info);
 //------------------------start request for paintig DOM-------
 
 let requestAll = new Promise((resolve, reject) => {
