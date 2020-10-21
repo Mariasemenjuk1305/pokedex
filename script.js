@@ -85,7 +85,7 @@ function requesForOne(id) {
             return data.json();
         })
         .then((data) => {
-            console.log(data);
+            // console.log(data);
             showDetailsAboutOne(data);
         })
         .catch((err) => {
@@ -140,7 +140,6 @@ function showDetailsAboutOne(data) {
 }
 
 function clickToElement() {
-    // console.log('1', data);
     for (let i = 0; i < pokeAll.length; i++) {
         pokeAll[i].onclick = () => {
             requesForOne(pokeAll[i].id);
