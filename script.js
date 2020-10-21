@@ -167,7 +167,7 @@ function byType() {
     end = 12;
     
     let requestForType = new Promise((resolve, reject) => {
-        fetch(`https:pokeapi.co/api/v2/type/${select.value}/`, {
+        fetch(`https://pokeapi.co/api/v2/type/${select.value}/`, {
                 method: "GET",
                 headers: {
                     "Access-Control-Allow-Origin": "*"
