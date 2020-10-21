@@ -184,7 +184,7 @@ function byType() {
     });
 
     requestForType.then(data => {
-        console.log(data);
+        // console.log(data);
         for (let i = start; i < end; i++) {
             pokeUrl.push(data.pokemon[i].pokemon.url);
         }
