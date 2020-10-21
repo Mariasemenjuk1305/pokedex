@@ -85,7 +85,7 @@ function requesForOne(id) {
             return data.json();
         })
         .then((data) => {
-            // console.log(data);
+            console.log(data);
             showDetailsAboutOne(data);
         })
         .catch((err) => {
