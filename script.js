@@ -1,13 +1,12 @@
-let pokeName = [];
 let pokeUrl = [];
-let info = [];
 let pokeAll = document.getElementsByClassName("poke");
+let id;
 let start = 0;
-let end = 12;
+let end = 13;
 //------------------------start request for paintig DOM-------
 
-let requestAll = new Promise((resolve, reject) => {
-    fetch("https://pokeapi.co/api/v2/pokemon/?limit=999", {
+let requestFirst = new Promise((resolve, reject) => {
+    fetch(`https://pokeapi.co/api/v2/pokemon/?limit=${start}&offset=${end}`, {
             method: "GET",
             headers: {
                 "Access-Control-Allow-Origin": "*"
@@ -25,20 +24,17 @@ let requestAll = new Promise((resolve, reject) => {
 
 
 function reciveRequests() {
-    requestAll.then(data => {
+    requestFirst.then(data => {
         data.results.map(element => {
-            pokeName.push(element.name);
             pokeUrl.push(element.url);
         });
     }).then(function () {
         requestDetails(start, end);
-    })
+    });
 }
 
-
-
 function requestDetails(start, end) {
-    for (let i = start; i <= end; i++) {
+    for (let i = start; i < end; i++) {
         fetch(pokeUrl[i], {
                 method: "GET",
                 headers: {
@@ -50,10 +46,10 @@ function requestDetails(start, end) {
             .then(data => {
                 return data.json();
             })
-            .then((data) => {
-                addToHTML(data, i);
-                info.push(data);
-                clickToElement()
+            .then(data => {
+                // console.log(data);
+                addToHTML(data);
+                clickToElement(data);
             })
             .catch((err) => {
                 console.log("ERROR:", err.message);
@@ -61,31 +57,49 @@ function requestDetails(start, end) {
     }
 }
 
-
-function addToHTML(data, index) {
+function addToHTML(data) {
     let box = document.querySelector(".poke-box");
-    box.innerHTML += `<div class="poke">
+    box.innerHTML += `<div class="poke" id=${data.id}>
                             <div class="poke-img">
                                 <img class="photo" src=${data.sprites.front_default} alt="img">
                             </div>
-                            <div class="poke-name">${pokeName[index]}</div>
+                            <div class="poke-name">${data.name}</div>
                             <div class="poke-skills">
                                 <span>${data.abilities[0].ability.name}</span>
                                 <span>${data.abilities[1].ability.name}</span>
                            </div>
                         </div>`
-
-
 }
 
+//------------------------request for details of some one pokemon------------------
+function requesForOne(id) {
+    fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`, {
+            method: "GET",
+            headers: {
+                "Access-Control-Allow-Origin": "*"
+            },
+            mode: "cors",
+            credentials: "same-origin"
+        })
+        .then(data => {
+            return data.json();
+        })
+        .then((data) => {
+            // console.log(data);
+            showDetailsAboutOne(data);
+        })
+        .catch((err) => {
+            console.log("ERROR:", err.message);
+        })
+}
 
 //------------------------painting details of some one pokemon------------------
 
-function showDetailsAboutOne(index) {
+function showDetailsAboutOne(data) {
     let boxDetails = document.querySelector(".poke-details");
     boxDetails.innerHTML = '';
     let out = '';
-    let id = info[index].id;
+    let id = data.id;
     if (id < 10) {
         id = '00' + id;
     } else if (id < 100) {
@@ -93,7 +107,7 @@ function showDetailsAboutOne(index) {
     } else if (id < 99) {
         id = id;
     }
-    let power = info[index].stats;
+    let power = data.stats;
     for (let k = 0; k < power.length; k++) {
         out += `<tr>
                   <td>${power[k].stat.name}</td>
@@ -104,8 +118,8 @@ function showDetailsAboutOne(index) {
     boxDetails.innerHTML = `<div class="details-block">
                                 <span class='close'>X</span>
                                 <div class="details-block-data">
-                                    <img src=${info[index].sprites.front_default} alt="img">
-                                    <div class="poke-details-name">${info[index].name} #${id}</div>
+                                    <img src=${data.sprites.front_default} alt="img">
+                                    <div class="poke-details-name">${data.name} #${id}</div>
                                     <table>
                                         <tr>
                                             <td>Type</td>
@@ -114,11 +128,11 @@ function showDetailsAboutOne(index) {
                                         ${out}
                                         <tr>
                                             <td>Weight</td>
-                                            <td>${info[index].weight}</td>
+                                            <td>${data.weight}</td>
                                         </tr>
                                         <tr>
                                             <td>Total moves</td>
-                                            <td>${info[index].base_experience}</td>
+                                            <td>${data.base_experience}</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -126,13 +140,61 @@ function showDetailsAboutOne(index) {
 }
 
 function clickToElement() {
+    // console.log('1', data);
     for (let i = 0; i < pokeAll.length; i++) {
         pokeAll[i].onclick = () => {
-            showDetailsAboutOne(i)
+            requesForOne(pokeAll[i].id);
             smallScreen();
         }
     }
 }
+
+
+//------------------------select by type----------------------------------------
+function sortByType(){
+    document.querySelector(".poke-box").innerHTML = '';
+    pokeUrl = [];
+    if (select.value == "" || select.value == "all"){
+        reciveRequests();
+    }else{
+        byType();
+
+    }
+}
+
+function byType() {
+    let select = document.getElementById("select");
+    start = 0;
+    end = 12;
+    
+    let requestForType = new Promise((resolve, reject) => {
+        fetch(`https:pokeapi.co/api/v2/type/${select.value}/`, {
+                method: "GET",
+                headers: {
+                    "Access-Control-Allow-Origin": "*"
+                },
+                mode: "cors",
+                credentials: "same-origin"
+            })
+            .then(data => {
+                resolve(data.json());
+            })
+            .catch((err) => {
+                console.log("ERROR:", err.message);
+            });
+    });
+
+    requestForType.then(data => {
+        console.log(data);
+        for (let i = start; i < end; i++) {
+            pokeUrl.push(data.pokemon[i].pokemon.url);
+        }
+    }).then(function () {
+        requestDetails(start, end);
+    });
+
+}
+document.getElementById("select").addEventListener("change", sortByType);
 
 //------------------------------------script for change view pokemon`s details-----
 function smallScreen() {
@@ -144,7 +206,7 @@ function smallScreen() {
     }
 }
 
-function close(){
+function close() {
     document.querySelector(".poke-details").style.display = "none";
     document.querySelector(".poke-details").innerHTML = '';
     document.querySelector(".poke-big").style.display = "flex";
@@ -154,40 +216,20 @@ function close(){
 document.querySelector(".close").addEventListener("click", close);
 document.querySelector(".poke-details").addEventListener("click", close);
 
- 
 
-//------------------------select by type----------------------------------------
 
-document.getElementById("select").onchange = () => {
-    let box = document.querySelector(".poke-box");
-    let select = document.getElementById("select");
-    box.innerHTML = '';
-    for(let i=0; i<info.length; i++){
-        info[i].types.forEach(element => {
-            if (element.type.name == select.value) {
-                box.innerHTML += `<div class="poke">
-                <div class="poke-img">
-                    <img class="photo" src=${info[i].sprites.front_default} alt="img">
-                </div>
-                <div class="poke-name">${info[i].name}</div>
-                <div class="poke-skills">
-                    <span>${info[i].abilities[0].ability.name}</span>
-                    <span>${info[i].abilities[1].ability.name}</span>
-                 </div>
-            </div>`
-            }
-    
-        });
-    }
-   
-}
 
 //----------------------------show more pokemon---------------------------------
 
 function loadMore() {
     start += 12;
     end += 12;
-    reciveRequests();
+    let select = document.getElementById("select");
+    if (select.value == "" || select.value == "all"){
+        reciveRequests();
+    }else{
+        byType()
+    }
 }
 
 document.getElementById("loadMore").addEventListener("click", loadMore);

@@ -105,7 +105,8 @@ select{
     display: flex;
     justify-content: center;
     background-color: white;
-    position: fixed;
+    position: sticky;
+    top: 100px;
 }
 
 .details-block-data {
